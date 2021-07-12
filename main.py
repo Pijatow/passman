@@ -13,7 +13,7 @@ class Main:
         '''default `json_file_name`: `data.json`'''
         self.json_file_name = json_file_name
         if json_file_name == '':
-            self.json_file_name = 'cut.json'
+            self.json_file_name = 'data.json'
         try:
             test = open(self.json_file_name)
             json.load(test)
@@ -151,5 +151,5 @@ class Main:
 
 
 if __name__ == '__main__':
-    main = Main(input('Enter json file name: (default name : cut.json)\n ==>'))
+    main = Main(input('Enter json file name: (default name : data.json)\n ==>'))
     main.run()
