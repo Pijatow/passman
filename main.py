@@ -1,22 +1,25 @@
 import json
 # from pprint import pprint
-from os import system
+import os
 from colorama import Style, Fore
 
 
 def clear_terminal(*args, **kwargs):
-    system('clear')
+    os.system('clear')
 
 
 class Main:
-    def __init__(self, json_file_name='data.json'):
-        '''default `json_file_name`: `data.json`'''
-        self.json_file_name = json_file_name
-        if json_file_name == '':
-            self.json_file_name = 'data.json'
+    def __init__(self, json_file_dir):
+        '''default `json_file_dir`: `data.json`'''
+        BASE_DIR = os.path.dirname(__file__)
+        if json_file_dir == '':
+            self._json_file_dir = 'data.json'
+        else:
+            self._json_file_dir == json_file_dir
+
         try:
-            test = open(self.json_file_name)
-            json.load(test)
+            with open(self._json_file_dir) as test:
+                json.load(test)
         except FileNotFoundError:
             print(Fore.RED, 'File Does not exist!')
             quit()
@@ -25,14 +28,14 @@ class Main:
             quit()
 
     def get_json_data(self) -> dict:
-        with open(self.json_file_name) as json_file_read:
+        with open(self._json_file_dir) as json_file_read:
             json_data = json.load(json_file_read)
         return json_data
 
     def append_json(self, data: dict):
         copy = self.get_json_data()
         copy.update(data)
-        with open(self.json_file_name, 'w') as file_write:
+        with open(self._json_file_dir, 'w') as file_write:
             json.dump(copy, file_write)
 
     def run(self):
@@ -151,5 +154,6 @@ class Main:
 
 
 if __name__ == '__main__':
-    main = Main(input('Enter json file name: (default name : data.json)\n ==>'))
+    file_path = input('Enter json file\' path: (default name : data.json)\n ==>')
+    main = Main(file_path)
     main.run()
