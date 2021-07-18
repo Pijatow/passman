@@ -1,14 +1,6 @@
 user regex(regular expression)
 provide similar word suggestions
 
-use OOP in app
-
-features:
-    take file(json file or any sort of database) name from user
-    add
-    edit
-    remove
-    confirm on add, edit, remove
 
 make cli(argparse) and gui(pyqt, tkinter, ...)
 
@@ -19,7 +11,6 @@ warning on short input
 
 work with JSON and database
 
-find words in item_names, item_emails, item_usernames, and everywhere
 highlight matching words
 ===========
 
