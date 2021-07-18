@@ -1,7 +1,14 @@
 import json
-# from pprint import pprint
 import os
-from colorama import Style, Fore
+import subprocess as sp
+try:
+    from colorama import Style, Fore
+except ImportError:
+    install_colorama = sp.run(['pip', 'install', 'colorama'], stdout=-3)
+    if install_colorama.returncode == 0:
+        from colorama import Style, Fore
+    # print('Install Colorama package with `pip install colorama` and then re-run the app :(')
+    # quit()
 
 
 def clear_terminal(*args, **kwargs):
@@ -11,20 +18,22 @@ def clear_terminal(*args, **kwargs):
 class Main:
     def __init__(self, json_file_dir):
         '''default `json_file_dir`: `data.json`'''
-        BASE_DIR = os.path.dirname(__file__)
+
         if json_file_dir == '':
-            self._json_file_dir = 'data.json'
+            self._json_file_dir = "data.json"
         else:
-            self._json_file_dir == json_file_dir
+            self._json_file_dir = f"{json_file_dir}"
 
         try:
             with open(self._json_file_dir) as test:
                 json.load(test)
         except FileNotFoundError:
-            print(Fore.RED, 'File Does not exist!')
-            quit()
+            print(
+                Fore.RED, f'File Does not exist!\nI will create a file named: {self._json_file_dir} ', Style.RESET_ALL)
+            with open(f'{self._json_file_dir}', 'w') as newFile:
+                json.dump({}, newFile)
         except json.JSONDecodeError:
-            print(Fore.RED, 'The Json file is either broken or not Formatted in Json.\n Try checking or reformatting the json file!')
+            print(Fore.RED, 'The Json file is either empty, broken or not Formatted in Json.\n Try checking or reformatting the json file!')
             quit()
 
     def get_json_data(self) -> dict:
@@ -36,7 +45,7 @@ class Main:
         copy = self.get_json_data()
         copy.update(data)
         with open(self._json_file_dir, 'w') as file_write:
-            json.dump(copy, file_write)
+            json.dump(copy, file_write, indent=2)
 
     def run(self):
         action_maps = {
@@ -74,7 +83,6 @@ class Main:
                         print('\n\n')
                 else:
                     func()
-                # self.printer(func_data)
             elif action == '':
                 continue
             else:
@@ -87,9 +95,9 @@ class Main:
         if target == 'NotPassed':
             target = input('-->')
         if target == '':
-            return
+            return items
         elif target in ('done', 'quit', 'back', 'exit'):
-            return
+            return items
         for item, data in self.get_json_data().items():  # each item and it's value in the json file that matches the target, gets added to the items variable which the function finally returns
             if target in item.lower() and target != 'all':
                 items.update({item: {}})
@@ -103,10 +111,13 @@ class Main:
 
     def add(self):
         new_item = {}
-        item_name = input('Enter new item\'s Name:')
         item_titles = []
         for i in range(5):
-            if i > 0 and input('want to add new title?  ').strip().lower() in ('no', 'n', 'false'):
+            if i == 0:
+                if input('want to proceed?  ').strip().lower() in ('no', 'n', 'false'):
+                    return None
+                item_name = input('Enter new item\'s Name:')
+            elif input('want to add new title?  ').strip().lower() in ('no', 'n', 'false'):
                 break
             new_title = input('title name:')
             new_value = input('value: ')
@@ -148,12 +159,49 @@ class Main:
         self.append_json(result)
 
     def remove(self):
-        inp = input('what do you want to remove: ')
-        result = self.find(inp)
-        result.get()
+        target = input('what do you want to remove? ')
+        found = self.find(target)
+        if len(found) == 0:
+            print('Nothing Was Found')
+            return
+        enum_found = dict(enumerate(found, start=1))
+        for index, item in enum_found.items():
+            print(index, item)
+
+        repeat = True
+        while repeat:
+            try:
+                chosen_index = int(input('choose one:  '))
+                if chosen_index not in enum_found:
+                    raise ValueError
+                repeat = False
+            except ValueError:
+                print(Fore.RED, 'Invalid Input', Style.RESET_ALL)
+
+        print(Fore.GREEN)
+        print('\n\n', enum_found[chosen_index], '\n')
+        for title, value in found[enum_found[chosen_index]].items():
+            print(title, '\b:', value)
+            print()
+        print(Style.RESET_ALL)
+
+        print(Fore.BLUE)
+        if input('DO YOU REALLY WANT TO REMOVE IT ? THIS ACTION CANNOT BE UNDONE !!!\n[y]') in ('y', ''):
+            if input('write CONFIRM: ') == 'CONFIRM':
+                copy = self.get_json_data()
+                copy.pop(enum_found[chosen_index])
+                with open(self._json_file_dir, 'w') as file_write:
+                    json.dump(copy, file_write, indent=2)
+                print(Fore.GREEN, 'THE ITEM GOT DELETED SUCCESSFULLY !')
+            else:
+                print(Fore.GREEN, 'CANCELLED !')
+        else:
+            print(Fore.GREEN, 'CANCELLED !')
+        print(Style.RESET_ALL)
 
 
 if __name__ == '__main__':
-    file_path = input('Enter json file\' path: (default name : data.json)\n ==>')
+    file_path = input(
+        'Enter json file\'s path: (default name : data.json)\n ==>')
     main = Main(file_path)
     main.run()
