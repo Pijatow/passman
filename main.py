@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import json
 import os
 import subprocess as sp
@@ -20,7 +21,7 @@ class Main:
         '''default `json_file_dir`: `data.json`'''
 
         if json_file_dir == '':
-            self._json_file_dir = "data.json"
+            self._json_file_dir = f"{os.path.dirname(__file__)}/data.json"
         else:
             self._json_file_dir = f"{json_file_dir}"
 
